@@ -66,9 +66,28 @@ router.get("/hotspotStates",(req,res)=>{
         }
        }
     ]).then((output)=>{
-        console.log(output);
-        res.send("got it");
+        let result={data:output};
+        res.status(200).send(result);
 
+    })
+})
+router.get("/healthyStates",(req,res)=>{
+    connection.aggregate([
+        {
+            $project:{
+                _id:0,
+                state:"$state",
+                mortality:{$round:[{$divide:["$death","$infected"]},5]}
+            }
+        },
+        {
+            $match:{
+                mortality:{$lt:0.005}
+            }
+        }
+    ]).then((output)=>{
+        let result={data:output}
+        res.status(200).send(result);
     })
 })
 module.exports={router};
